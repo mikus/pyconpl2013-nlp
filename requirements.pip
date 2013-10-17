@@ -1,0 +1,4 @@
+-e git+https://github.com/agh-glk/pydic.git#egg=pydic
+#-e git+https://github.com/cypreess/csvkit.git#egg=csvkit
+csvkit
+pylev
