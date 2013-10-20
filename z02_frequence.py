@@ -4,6 +4,12 @@
 from collections import Counter
 from itertools import chain, imap
 import sys
+import re
+
+from pydic import PyDic
+
+
+sjp = PyDic('data/sjp.pydic')
 
 
 def tokenize_line(line):
@@ -14,11 +20,12 @@ def tokenize_line(line):
     Dzięki użyciu generatora, 
     """
 
-    #
-    # TWÓJ KOD TUTAJ !!!!
-    #
-
-    yield 'FAKE_TOKEN'
+    for word in re.findall(u'\w+', line.lower(), re.U):
+        bases = [item for item in sjp.word_base(word) if item.islower()]
+        if bases:
+            yield min(bases, key=len)
+        else:
+            yield word
 
 # Automatically load solution if available
 tokenizer = tokenize_line

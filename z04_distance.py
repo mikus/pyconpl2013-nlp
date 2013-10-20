@@ -2,7 +2,30 @@
 import argparse
 import csv
 import sys
+import re
 from pylev import levenshtein
+
+from pydic import PyDic
+
+
+sjp = PyDic('data/sjp.pydic')
+
+
+def tokenize_line(line):
+    """
+    Ta funkcja przyjmuje linię tekstu "Ala ma kota, a kot ma Ale!".
+    Powinna zwrócic generator, generujący kolejne wyrazy: ["Ala", "ma", "kota", "a", "kot", "ma", "Ale"
+
+    Dzięki użyciu generatora,
+    """
+
+    for word in re.findall(u'\w+', line.lower(), re.U):
+        bases = [item for item in sjp.word_base(word) if item.islower()]
+        if bases:
+            yield min(bases, key=len)
+        else:
+            yield word
+
 
 # Wczytywanie stoplisty z pliku jako zbioru python
 # np. domyślna stoplista produkuje następujący zbiór:
@@ -13,17 +36,24 @@ stoplist = set(map(lambda w: w.decode('utf-8').strip(), open('gsm.stop').read().
 
 def prepare_for_levenshtein(text):
     """Ma zwrócić napis dla metryki LEVENSHTEINA"""
-    return text.lower()
+    r = ' '.join(sorted([item for item in tokenize_line(text) if not (item in stoplist)]))
+    #print r
+    return r
 
 
 def prepare_for_dice(text):
     """Ma zwrócić zbiór wyrazów dla metryki DICEA"""
-    return set(text.split(u' '))
+    s = set()
+    n = 2
+    t = ' '.join([item for item in tokenize_line(text) if not (item in stoplist)])
+    for i in range(0, len(t)-n, n):
+        s.add(t[i:i+n])
+    return s
 
 
 def prepare_for_lcs(text):
     """Ma zwrócić przetworzony napis dla metryki LCS"""
-    return text.lower()
+    return ' '.join(sorted([item for item in tokenize_line(text) if not (item in stoplist)]))
 
 
 def lcs(S1, S2):
